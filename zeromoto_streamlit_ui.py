@@ -1,6 +1,6 @@
-# Create the Streamlit UI code using the calculator module logic
+# Re-create the Streamlit Cloud-safe version of the app after kernel reset
 
-streamlit_ui_code = """
+streamlit_cloud_safe_code = """
 import streamlit as st
 from datetime import datetime
 import pandas as pd
@@ -40,7 +40,7 @@ with st.form("emission_form"):
         df = pd.DataFrame(list(comparison.items()), columns=["Vehicle Type", "CO₂ (kg)"])
         st.bar_chart(df.set_index("Vehicle Type"))
 
-        # Save result
+        # Save result to memory (not to file)
         record = {
             "Date": date.strftime("%Y-%m-%d"),
             "Scooter ID": scooter_id,
@@ -49,17 +49,20 @@ with st.form("emission_form"):
             "CO₂ Emitted (kg)": co2_emitted
         }
 
+        result_df = pd.DataFrame([record])
+        csv_data = result_df.to_csv(index=False).encode("utf-8")
+
         st.download_button(
             label="📥 Download This Record (CSV)",
-            data=pd.DataFrame([record]).to_csv(index=False),
+            data=csv_data,
             file_name=f"Zeromoto_CO2_Record_{date}.csv",
             mime="text/csv"
         )
 """
 
-# Save to file
-file_path = "/mnt/data/zeromoto_streamlit_ui.py"
-with open(file_path, "w", encoding="utf-8") as file:
-    file.write(streamlit_ui_code)
+# Save the Streamlit Cloud-safe version to file
+cloud_safe_file_path = "/mnt/data/zeromoto_streamlit_cloud_safe.py"
+with open(cloud_safe_file_path, "w", encoding="utf-8") as file:
+    file.write(streamlit_cloud_safe_code)
 
-file_path
+cloud_safe_file_path
