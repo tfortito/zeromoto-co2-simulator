@@ -1,6 +1,6 @@
-# Re-generate the hybrid Streamlit app after environment reset
+# Generate a clean version of the trip logger Streamlit app (with no file writing)
 
-trip_logger_ui_code = """
+trip_logger_clean_code = """
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -27,7 +27,7 @@ st.title("📋 Zeromoto Trip Logger & CO₂ Tracker")
 
 # --- CSV Upload Section ---
 st.header("📥 Upload Trip Log (CSV)")
-csv_file = st.file_uploader("Upload CSV File (Date, Scooter ID, Distance, Vehicle Type)", type="csv")
+csv_file = st.file_uploader("Upload CSV File (Date, Scooter ID, Distance (km), Vehicle Type)", type="csv")
 if csv_file is not None:
     df = pd.read_csv(csv_file)
     df["CO₂ Emitted (kg)"] = df.apply(lambda row: calculate_emissions(row["Distance (km)"], row["Vehicle Type"]), axis=1)
@@ -74,9 +74,9 @@ else:
     st.info("No trips logged yet. Upload a CSV or add manually.")
 """
 
-# Save to file again
-trip_logger_file_path = "/mnt/data/zeromoto_trip_logger.py"
-with open(trip_logger_file_path, "w", encoding="utf-8") as file:
-    file.write(trip_logger_ui_code)
+# Save the clean version to file
+clean_trip_logger_file = "/mnt/data/zeromoto_trip_logger_clean.py"
+with open(clean_trip_logger_file, "w", encoding="utf-8") as file:
+    file.write(trip_logger_clean_code)
 
-trip_logger_file_path
+clean_trip_logger_file
