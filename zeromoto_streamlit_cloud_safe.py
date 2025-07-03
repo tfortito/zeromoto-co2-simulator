@@ -22,6 +22,10 @@ def compare_emissions(distance_km):
 st.set_page_config(page_title="Zeromoto CO₂ Calculator", layout="centered")
 st.title("🛵 Zeromoto CO₂ Emission Simulator")
 
+# Initialize session state to store result
+if "last_record" not in st.session_state:
+    st.session_state.last_record = None
+
 with st.form("emission_form"):
     date = st.date_input("Trip Date", value=datetime.today())
     scooter_id = st.text_input("Scooter ID (e.g. ZM-001)")
@@ -29,30 +33,30 @@ with st.form("emission_form"):
     vehicle = st.selectbox("Vehicle Type", list(EMISSION_FACTORS.keys()))
     submitted = st.form_submit_button("Calculate Emissions")
 
-    if submitted:
-        co2_emitted = calculate_emissions(distance, vehicle)
-        st.success(f"📉 Estimated CO₂ Emitted: {co2_emitted} kg")
+if submitted:
+    co2_emitted = calculate_emissions(distance, vehicle)
+    st.success(f"📉 Estimated CO₂ Emitted: {co2_emitted} kg")
 
-        # Display comparison chart
-        comparison = compare_emissions(distance)
-        df = pd.DataFrame(list(comparison.items()), columns=["Vehicle Type", "CO₂ (kg)"])
-        st.bar_chart(df.set_index("Vehicle Type"))
+    comparison = compare_emissions(distance)
+    df = pd.DataFrame(list(comparison.items()), columns=["Vehicle Type", "CO₂ (kg)"])
+    st.bar_chart(df.set_index("Vehicle Type"))
 
-        # Prepare downloadable CSV from memory
-        record = {
-            "Date": date.strftime("%Y-%m-%d"),
-            "Scooter ID": scooter_id,
-            "Vehicle Type": vehicle,
-            "Distance (km)": distance,
-            "CO₂ Emitted (kg)": co2_emitted
-        }
+    # Save result to session state
+    st.session_state.last_record = {
+        "Date": date.strftime("%Y-%m-%d"),
+        "Scooter ID": scooter_id,
+        "Vehicle Type": vehicle,
+        "Distance (km)": distance,
+        "CO₂ Emitted (kg)": co2_emitted
+    }
 
-        result_df = pd.DataFrame([record])
-        csv_data = result_df.to_csv(index=False).encode("utf-8")
-
-        st.download_button(
-            label="📥 Download CO₂ Record (CSV)",
-            data=csv_data,
-            file_name=f"Zeromoto_CO2_Record_{date}.csv",
-            mime="text/csv"
-        )
+# Show download button if there's a record
+if st.session_state.last_record:
+    result_df = pd.DataFrame([st.session_state.last_record])
+    csv_data = result_df.to_csv(index=False).encode("utf-8")
+    st.download_button(
+        label="📥 Download CO₂ Record (CSV)",
+        data=csv_data,
+        file_name=f"Zeromoto_CO2_Record_{st.session_state.last_record['Date']}.csv",
+        mime="text/csv"
+    )
